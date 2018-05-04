@@ -1,8 +1,7 @@
-package net.tomahawk;
+package consulo.internal.windows;
 
 import java.io.File;
 import java.util.List;
-
 
 public class ExtensionsFilter extends javax.swing.filechooser.FileFilter
 {

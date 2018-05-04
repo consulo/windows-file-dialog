@@ -28,7 +28,7 @@
 #include <comdef.h>
 #include <afxpriv.h>
 
-#include "net_tomahawk_XFileDialog.h"
+#include "consulo_internal_windows_WindowsFileDialog.h"
 #include "XPFolderDialog.h"
 #include "XPThumbnailDialog.h"
 #include "VistaThumbnailDialogHandler.h"
@@ -178,7 +178,7 @@ jbyteArray CString2ByteArray(JNIEnv *env, CString val)
 
 }
 
-JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_refreshFrame
+JNIEXPORT void JNICALL Java_consulo_internal_windows_WindowsFileDialog_refreshFrame
   (JNIEnv *env, jobject obj)
 {
 	if(pWnd!=NULL)
@@ -191,7 +191,7 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_refreshFrame
 }
 
 
-JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_initWithWindowTitle
+JNIEXPORT void JNICALL Java_consulo_internal_windows_WindowsFileDialog_initWithWindowTitle
   (JNIEnv *env, jobject obj, jstring windowtitle)
 {
 	// use the string the get the window
@@ -218,7 +218,7 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_initWithWindowTitle
 
 HMODULE _hAWT = 0;
 
-JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_initWithJAWT
+JNIEXPORT void JNICALL Java_consulo_internal_windows_WindowsFileDialog_initWithJAWT
   (JNIEnv *env, jobject obj, jobject comp, jstring javahome)
 {
     // the implementation is correct and elegant 
@@ -337,13 +337,13 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_initWithJAWT
 
 
 
-JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getDirectory2
+JNIEXPORT jbyteArray JNICALL Java_consulo_internal_windows_WindowsFileDialog_getDirectory2
   (JNIEnv *env, jobject obj)
 {
 	return CString2ByteArray(env, currentDir);
 }
 
-JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setDirectory2
+JNIEXPORT void JNICALL Java_consulo_internal_windows_WindowsFileDialog_setDirectory2
   (JNIEnv *env, jobject obj, jstring dirstr)
 {
 	if(dirstr==NULL) return;
@@ -365,7 +365,7 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setDirectory2
 	// it does not affect the filedialog's init location
 }
 
-JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setMode2
+JNIEXPORT void JNICALL Java_consulo_internal_windows_WindowsFileDialog_setMode2
   (JNIEnv *env, jobject obj, jint mode)
 {
 	if(mode==0)
@@ -384,7 +384,7 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setMode2
 
 }
 
-JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setThumbnail2
+JNIEXPORT void JNICALL Java_consulo_internal_windows_WindowsFileDialog_setThumbnail2
   (JNIEnv *env, jobject obj, jint mode)
 {
 	if(mode>0)
@@ -402,7 +402,7 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setThumbnail2
 
 }
 
-JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setTraceLevel2
+JNIEXPORT void JNICALL Java_consulo_internal_windows_WindowsFileDialog_setTraceLevel2
   (JNIEnv *env, jclass cls, jint val)
 {
 	traceLevel= val;
@@ -413,14 +413,14 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setTraceLevel2
 
 
 
-JNIEXPORT jint JNICALL Java_net_tomahawk_XFileDialog_getMode2
+JNIEXPORT jint JNICALL Java_consulo_internal_windows_WindowsFileDialog_getMode2
   (JNIEnv *env, jobject obj)
 {
 	if(bOpenFileDialog ==TRUE ) return 0;
         else return 1;
 }
 
-JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getFile2
+JNIEXPORT jbyteArray JNICALL Java_consulo_internal_windows_WindowsFileDialog_getFile2
   (JNIEnv *env, jobject obj)
 {
 	CString pathName;
@@ -582,7 +582,7 @@ JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getFile2
 }
 
 
-JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getFolder2
+JNIEXPORT jbyteArray JNICALL Java_consulo_internal_windows_WindowsFileDialog_getFolder2
   (JNIEnv *env, jobject obj)
 {
 
@@ -788,7 +788,7 @@ JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getFolder2
 }
 
 
-JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setFilters2
+JNIEXPORT void JNICALL Java_consulo_internal_windows_WindowsFileDialog_setFilters2
   (JNIEnv *env, jobject obj, jstring filterstr)
 {
 	const jchar *str = (*env).GetStringChars(filterstr, 0);
@@ -799,7 +799,7 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setFilters2
 	filters= tmp;
 }
 
-JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setTitle2
+JNIEXPORT void JNICALL Java_consulo_internal_windows_WindowsFileDialog_setTitle2
   (JNIEnv *env, jobject obj, jstring dlgtitle)
 {
 	const jchar *str = (*env).GetStringChars(dlgtitle, 0);
@@ -809,7 +809,7 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setTitle2
 }
 
 
-JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getTitle2
+JNIEXPORT jbyteArray JNICALL Java_consulo_internal_windows_WindowsFileDialog_getTitle2
   (JNIEnv *env, jobject obj)
 {
 	return CString2ByteArray(env, title);
@@ -822,7 +822,7 @@ JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getTitle2
 // 	GetStartPosition(); 
 // 	
 //
-JNIEXPORT jobjectArray JNICALL Java_net_tomahawk_XFileDialog_getFiles2
+JNIEXPORT jobjectArray JNICALL Java_consulo_internal_windows_WindowsFileDialog_getFiles2
 (JNIEnv *env, jobject obj)
 {
 	// MAX_SELECTION = 500
@@ -978,7 +978,7 @@ JNIEXPORT jobjectArray JNICALL Java_net_tomahawk_XFileDialog_getFiles2
 
 }
 
-JNIEXPORT jobjectArray JNICALL Java_net_tomahawk_XFileDialog_getFolders2
+JNIEXPORT jobjectArray JNICALL Java_consulo_internal_windows_WindowsFileDialog_getFolders2
 (JNIEnv *env, jobject obj)
 {
 	INT_PTR nCounter=0;

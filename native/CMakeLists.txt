@@ -20,7 +20,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /O1 /EHsc")
 
 include_directories(${JNI_INCLUDE_DIRS})
 
-set(SOURCE_FILES net_tomahawk_XFileDialog.cpp net_tomahawk_XFileDialog.h VistaThumbnailDialogHandler.cpp VistaThumbnailDialogHandler.h XPFolderDialog.cpp XPThumbnailDialog.cpp XPThumbnailDialog.h XPFolderDialog.h)
+set(SOURCE_FILES consulo_internal_windows_WindowsFileDialog.cpp consulo_internal_windows_WindowsFileDialog.h VistaThumbnailDialogHandler.cpp VistaThumbnailDialogHandler.h XPFolderDialog.cpp XPThumbnailDialog.cpp XPThumbnailDialog.h XPFolderDialog.h)
 
 if (CMAKE_CL_64)
     add_definitions(-DOS_ARCH_X64)

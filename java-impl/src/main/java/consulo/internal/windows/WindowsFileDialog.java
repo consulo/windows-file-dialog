@@ -1,4 +1,4 @@
-package net.tomahawk;
+package consulo.internal.windows;
 
 import java.applet.Applet;
 import java.awt.Component;
@@ -8,13 +8,12 @@ import java.io.File;
 
 import javax.swing.JFileChooser;
 
-
 // to add patch from Jose 
 // 1. the new extensionsfilter has been added. 
 // 2. get should return files directly 
 //
 //
-public class XFileDialog
+public class WindowsFileDialog
 {
 	//XFileDialog's parent could be a Frame or an Applet,
 	// therefore, we have to use Component instead of Frame here.
@@ -429,33 +428,15 @@ public class XFileDialog
 		trace("JNI>>: java.library.path:" + System.getProperty("java.library.path"));
 		try
 		{
-			if(System.getProperty("os.arch").indexOf("64") >= 0)
-			{
-				trace("JNI>>: Loading X64 (amd64) DLL");
-				System.loadLibrary("windows-file-chooser64");
-			}
-			else
-			{
-				trace("JNI>>: Loading X86 32bit DLL");
-				System.loadLibrary("xfiledialog");
-			}
+			LibraryLoader.loadLibrary();
 
 			nativeEnabled = true;
 		}
-		catch(UnsatisfiedLinkError e)
+		catch(Exception e)
 		{
 			e.printStackTrace();
 
-			if(System.getProperty("os.arch").indexOf("64") >= 0)
-			{
-				trace("JNI>>: The xfiledialog64.dll (AMD64) can not be loaded.");
-			}
-			else
-			{
-				trace("JNI>>: The xfiledialog.dll can not be loaded.");
-			}
-
-			trace("JNI>>: JFileChooser will be used instead.");
+			trace("JNI>>: The library can not be loaded. JFileChooser will be used instead.");
 			nativeEnabled = false;
 		}
 
@@ -468,7 +449,7 @@ public class XFileDialog
 		initOnce = true;
 	}
 
-	public XFileDialog(Frame parent)
+	public WindowsFileDialog(Frame parent)
 	{
 		String windowtitle = null;
 		this.parent = parent;
@@ -497,7 +478,7 @@ public class XFileDialog
 
 	}
 
-	public XFileDialog(Applet parent)
+	public WindowsFileDialog(Applet parent)
 	{
 
 		String windowtitle = null;
@@ -520,7 +501,7 @@ public class XFileDialog
 
 	}
 
-	public XFileDialog(String windowtitle)
+	public WindowsFileDialog(String windowtitle)
 	{
 		initClass();
 		if(nativeEnabled)

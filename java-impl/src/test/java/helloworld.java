@@ -16,6 +16,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 
+import consulo.internal.windows.ExtensionsFilter;
+import consulo.internal.windows.WindowsFileDialog;
+
 class helloworld extends JFrame implements ActionListener
 {
 	String title1 = "Open File Dialog (single-selection)";
@@ -112,7 +115,7 @@ class helloworld extends JFrame implements ActionListener
 		// get single file, return value is a relative filename;
 		if(action.equals(title1))
 		{
-			XFileDialog dlg = new XFileDialog(helloworld.this);
+			WindowsFileDialog dlg = new WindowsFileDialog(helloworld.this);
 			dlg.setTitle(title1);
 			String content = dlg.getFile();
 			String folder = dlg.getDirectory();
@@ -141,7 +144,7 @@ class helloworld extends JFrame implements ActionListener
 		// get multi-files, return values are relative names
 		if(action.equals(title2))
 		{
-			XFileDialog dlg = new XFileDialog(helloworld.this);
+			WindowsFileDialog dlg = new WindowsFileDialog(helloworld.this);
 			dlg.setTitle(title2);
 			String content = null;
 			// multi-selection will be turned on automatically
@@ -170,7 +173,7 @@ class helloworld extends JFrame implements ActionListener
 		// get a folder, the return value is an absolute (full) path name
 		if(action.equals(title3))
 		{
-			XFileDialog dlg = new XFileDialog(helloworld.this);
+			WindowsFileDialog dlg = new WindowsFileDialog(helloworld.this);
 			dlg.setTitle(title3);
 
 			String content = dlg.getFolder();
@@ -186,7 +189,7 @@ class helloworld extends JFrame implements ActionListener
 		// get folders, the return values are absolute (full) path names
 		if(action.equals(title4))
 		{
-			XFileDialog dlg = new XFileDialog(helloworld.this);
+			WindowsFileDialog dlg = new WindowsFileDialog(helloworld.this);
 			dlg.setTitle(title4);
 			String[] itemNames = dlg.getFolders();
 
@@ -214,7 +217,7 @@ class helloworld extends JFrame implements ActionListener
 		//
 		if(action.equals(title5))
 		{
-			XFileDialog dlg = new XFileDialog(helloworld.this);
+			WindowsFileDialog dlg = new WindowsFileDialog(helloworld.this);
 			dlg.setThumbnail(true);
 			dlg.setTitle(title5);
 
@@ -261,7 +264,7 @@ class helloworld extends JFrame implements ActionListener
 		//
 		if(action.equals(title6))
 		{
-			XFileDialog dlg = new XFileDialog(helloworld.this);
+			WindowsFileDialog dlg = new WindowsFileDialog(helloworld.this);
 			dlg.setThumbnail(true);
 			dlg.setTitle(title6);
 
@@ -286,7 +289,7 @@ class helloworld extends JFrame implements ActionListener
 
 		if(action.equals(title7))  // test the save file dialog
 		{
-			XFileDialog dlg = new XFileDialog(helloworld.this);
+			WindowsFileDialog dlg = new WindowsFileDialog(helloworld.this);
 
 			dlg.setTitle(title7);
 
