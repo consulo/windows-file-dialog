@@ -3,3 +3,8 @@
 /out
 /target
 target/
+/.vs/
+/Debug
+/Release
+.idea/
+cmake-build-*/

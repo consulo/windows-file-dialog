@@ -17,7 +17,6 @@ public class ExtensionsFilter extends javax.swing.filechooser.FileFilter
 	String shortDescription;
 	String description;
 
-
 	// constructor 1 (from a List)
 	public ExtensionsFilter(String shortDescription, List<String> extensions)
 	{

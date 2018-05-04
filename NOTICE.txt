@@ -1,0 +1,3 @@
+Fork of https://code.google.com/archive/p/xfiledialog
+
+Author: stevpan@gmail.com

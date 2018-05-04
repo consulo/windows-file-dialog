@@ -24,19 +24,19 @@
 
 #include <jni.h>
 #include <stdio.h>
-#include <afxdlgs.h> 
+#include <afxdlgs.h>
 #include <comdef.h>
 #include <afxpriv.h>
 
 #include "net_tomahawk_XFileDialog.h"
-#include "XPFolderDialog.h" 
-#include "XPThumbnailDialog.h" 
-#include "VistaThumbnailDialogHandler.h" 
+#include "XPFolderDialog.h"
+#include "XPThumbnailDialog.h"
+#include "VistaThumbnailDialogHandler.h"
 
 // Windows SDK header files in 
 // e.g. d:\Windows\Microsoft Sdks\Windows\v6.0A\Include
-#include "ShFolder.h"
-#include "ShObjIdl.h" 
+//#include "ShFolder.h"
+#include "ShObjIdl.h"
 #include "KnownFolders.h"
 
 // JNI header 
@@ -58,18 +58,18 @@
 
 // control the debug output 
 //
-int traceLevel=1; 
-TCHAR tracebuffer[1000]; 
+int traceLevel=1;
+TCHAR tracebuffer[1000];
 
 HWND hWnd=0;  // handle of the JFrame
 CWnd* pWnd;   // window object of the JFrame
 IShellItem *currentDirItem; // Item in IFileDialog 
 CString currentDir;   // the current directory 
-bool bOpenFileDialog=TRUE;  // open or save dialog 
+bool bOpenFileDialog=TRUE;  // open or save dialog
 CString title;   // the dialog title
 CString filters;  // file filters 
 
-UINT listviewmode=0;  
+UINT listviewmode=0;
 // 0 means standard filedialog 
 // > 1 means thumbnail view mode filedialog 
 
@@ -77,10 +77,10 @@ UINT listviewmode=0;
 void trace()
 {
 	// it uses pure tchar array, not CString
-	if(traceLevel> 0) wprintf(tracebuffer); 
+	if(traceLevel> 0) wprintf(tracebuffer);
 
 	// else do not show anything
-		
+
 }
 
 
@@ -95,8 +95,8 @@ BOOL IsXP()
 	DWORD dwMajorVersion = osinfo.dwMajorVersion;
 	DWORD dwMinorVersion = osinfo.dwMinorVersion;
 
-	return ((dwPlatformId == 2) && 
-			(dwMajorVersion == 5) && 
+	return ((dwPlatformId == 2) &&
+			(dwMajorVersion == 5) &&
 			(dwMinorVersion >= 1));
 }
 
@@ -110,81 +110,81 @@ BOOL IsVista()
 	DWORD dwPlatformId   = osinfo.dwPlatformId;
 	DWORD dwMajorVersion = osinfo.dwMajorVersion;
 
-	return ((dwPlatformId == 2) && 
+	return ((dwPlatformId == 2) &&
 			(dwMajorVersion >= 6));
 }
 
 
-jbyteArray CString2ByteArray(JNIEnv *env, CString val) 
+jbyteArray CString2ByteArray(JNIEnv *env, CString val)
 {
 
 	// Important
 	//
-	// Windows Unicode is UTF-16 
+	// Windows Unicode is UTF-16
 	//
-	// The TCHAR (wide character) in Windows refers 
+	// The TCHAR (wide character) in Windows refers
 	// unsigned short wchar_t;
 	//
-	// Unicode uses TCHAR to represent real characters. 
-	// A character generally will require one TCHAR 
+	// Unicode uses TCHAR to represent real characters.
+	// A character generally will require one TCHAR
 	// (multi-TCHAR is used in  rare cases)
 	//
 	// For characters in the Basic Multilingual Plane (BMP) of Unicode
 	// A UTF-16 character = A TCHAR
 	//
-	// the BMP supports about 90 Scripts (languages) including 
+	// the BMP supports about 90 Scripts (languages) including
 	// Latin, CJK
 	// http://en.wikipedia.org/wiki/Mapping_of_Unicode_character_planes
 	//
 
 	const TCHAR* buffer = NULL;
 	DWORD bufferlen = 0;
-	bufferlen = val.GetLength(); 
+	bufferlen = val.GetLength();
 
 	swprintf_s(tracebuffer, L"DLL>>: %s\n", val);
-	trace(); 
+	trace();
 
-	swprintf_s(tracebuffer, L"DLL>>: CString2ByteArray bufferlen %d\n", bufferlen); 
-	trace(); 
+	swprintf_s(tracebuffer, L"DLL>>: CString2ByteArray bufferlen %d\n", bufferlen);
+	trace();
 
 
-	buffer = val.GetBuffer(bufferlen); 
-	
-	// one short = two bytes 
+	buffer = val.GetBuffer(bufferlen);
 
-	// should I add bom as the first two bytes when return? 
-	// does the last two zeros are added automatically? 
+	// one short = two bytes
 
-	// for big edian  0xFE 0xFF header 
+	// should I add bom as the first two bytes when return?
+	// does the last two zeros are added automatically?
+
+	// for big edian  0xFE 0xFF header
 	// for little edian 0xFF 0xFE
 	//
-	// if BOM is missing, big endian is used in default 
+	// if BOM is missing, big endian is used in default
 	//
 
 	jbyteArray result = (*env).NewByteArray( bufferlen*2 + 2 );
-	(*env).SetByteArrayRegion(result,0, bufferlen*2, (jbyte*)buffer); 
- 	
+	(*env).SetByteArrayRegion(result,0, bufferlen*2, (jbyte*)buffer);
 
 
-	(*env).SetByteArrayRegion(result,2, bufferlen*2, (jbyte*)buffer); 
 
-	// the big endian header for UTF-16 encoding 
-	BYTE   header[2]   =   {0xff, 0xfe}; 
+	(*env).SetByteArrayRegion(result,2, bufferlen*2, (jbyte*)buffer);
 
-	(*env).SetByteArrayRegion(result,0, 2, (jbyte*)header); 
+	// the big endian header for UTF-16 encoding
+	BYTE   header[2]   =   {0xff, 0xfe};
+
+	(*env).SetByteArrayRegion(result,0, 2, (jbyte*)header);
 
 
-	return  result; 
+	return  result;
 
 }
 
 JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_refreshFrame
   (JNIEnv *env, jobject obj)
 {
-	if(pWnd!=NULL) 
+	if(pWnd!=NULL)
 	{
-		pWnd->Invalidate(NULL); 
-		pWnd->UpdateWindow(); 
+		pWnd->Invalidate(NULL);
+		pWnd->UpdateWindow();
 	}
 
 
@@ -200,18 +200,18 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_initWithWindowTitle
 	const jchar *str = (*env).GetStringChars(windowtitle, 0);
 	// convert the jchar array to CString
 
-	CString tmp((BSTR)str); 
+	CString tmp((BSTR)str);
 
-	hWnd = FindWindow(NULL, tmp); 
-	
-	swprintf_s(tracebuffer, L"DLL>>:: hWnd of JFrame(awt) is 0x%x\n", hWnd); 
-	trace(); 
+	hWnd = FindWindow(NULL, tmp);
 
-	pWnd = CWnd::FromHandle(hWnd); 
+	swprintf_s(tracebuffer, L"DLL>>:: hWnd of JFrame(awt) is 0x%x\n", hWnd);
+	trace();
 
-	bOpenFileDialog=TRUE; 
-	char nullstr = NULL; 
-	title = CString(nullstr); 
+	pWnd = CWnd::FromHandle(hWnd);
+
+	bOpenFileDialog=TRUE;
+	char nullstr = NULL;
+	title = CString(nullstr);
 	filters = "All files (*.*)|*.*||";   // default
 
 }
@@ -229,15 +229,15 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_initWithJAWT
     // jawt.dll can not be located and this function will fail. 
     //
     //
-    swprintf_s(tracebuffer, L"DLL>>: initWithJAWT\n" ); 
-    trace(); 
+    swprintf_s(tracebuffer, L"DLL>>: initWithJAWT\n" );
+    trace();
 
     hWnd=0; // init it with zero
 
     const jchar *str = (*env).GetStringChars(javahome, 0);
-	CString tmp((BSTR)str); 
+	CString tmp((BSTR)str);
 
-	CString jrepath = tmp + _T("\\bin"); 
+	CString jrepath = tmp + _T("\\bin");
 
     swprintf_s(tracebuffer, L"DLL>>: jrepath: %s\n" ,jrepath ); // a unicode CString
 
@@ -262,11 +262,11 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_initWithJAWT
     {
 	#ifdef OS_ARCH_X86
         PJAWT_GETAWT JAWT_GetAWT = (PJAWT_GETAWT)GetProcAddress(_hAWT, "_JAWT_GetAWT@8");
-	#endif 
+	#endif
 
 	#ifdef OS_ARCH_X64
         PJAWT_GETAWT JAWT_GetAWT = (PJAWT_GETAWT)GetProcAddress(_hAWT, "JAWT_GetAWT");
-	#endif 
+	#endif
 
         if(JAWT_GetAWT)
         {
@@ -321,15 +321,15 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_initWithJAWT
     }
 
     // init other variables 
-	swprintf_s(tracebuffer, L"DLL>>:: hWnd of JFrame found in JAWT: 0x%x\n", hWnd); 
-	trace(); 
+	swprintf_s(tracebuffer, L"DLL>>:: hWnd of JFrame found in JAWT: 0x%x\n", hWnd);
+	trace();
 
-	pWnd = CWnd::FromHandle(hWnd); 
+	pWnd = CWnd::FromHandle(hWnd);
 
-	bOpenFileDialog=TRUE; 
-	char nullstr = NULL; 
-	title = CString(nullstr); 
-	filters = "All files (*.*)|*.*||"; 
+	bOpenFileDialog=TRUE;
+	char nullstr = NULL;
+	title = CString(nullstr);
+	filters = "All files (*.*)|*.*||";
 
 
 
@@ -340,74 +340,74 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_initWithJAWT
 JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getDirectory2
   (JNIEnv *env, jobject obj)
 {
-	return CString2ByteArray(env, currentDir); 
+	return CString2ByteArray(env, currentDir);
 }
 
 JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setDirectory2
   (JNIEnv *env, jobject obj, jstring dirstr)
 {
-	if(dirstr==NULL) return; 
+	if(dirstr==NULL) return;
 	const jchar *str = (*env).GetStringChars(dirstr, 0);
 
 	// save it into the String currentDir
 	// this variable will be used in CFileDialog creation
 	// to force it to the correct init directory
-	CString tmp((BSTR)str); 
-	currentDir=tmp; 
+	CString tmp((BSTR)str);
+	currentDir=tmp;
 
 
-	swprintf_s(tracebuffer, L"DLL>>: Set the current directory %s\n",   tmp); 
-	trace(); 
+	swprintf_s(tracebuffer, L"DLL>>: Set the current directory %s\n",   tmp);
+	trace();
 
 
-	SetCurrentDirectory(tmp);  
-	// this only set the current working directory, 
+	SetCurrentDirectory(tmp);
+	// this only set the current working directory,
 	// it does not affect the filedialog's init location
 }
 
 JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setMode2
   (JNIEnv *env, jobject obj, jint mode)
 {
-	if(mode==0) 
+	if(mode==0)
 	{
-		swprintf_s(tracebuffer, L"DLL>>: Set bOpenFileDialog to be True\n"); 
-		trace(); 
-		bOpenFileDialog =TRUE; 
+		swprintf_s(tracebuffer, L"DLL>>: Set bOpenFileDialog to be True\n");
+		trace();
+		bOpenFileDialog =TRUE;
 	}
-	else 
+	else
 	{
-		swprintf_s(tracebuffer, L"DLL>>: Set bOpenFileDialog to be False\n"); 
-		trace(); 
-		bOpenFileDialog =FALSE; 
+		swprintf_s(tracebuffer, L"DLL>>: Set bOpenFileDialog to be False\n");
+		trace();
+		bOpenFileDialog =FALSE;
 	}
-	
+
 
 }
 
 JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setThumbnail2
   (JNIEnv *env, jobject obj, jint mode)
 {
-	if(mode>0) 
+	if(mode>0)
 	{
-		if( IsXP() )  listviewmode= XLVM_XP_THUMBNAILS; 
+		if( IsXP() )  listviewmode= XLVM_XP_THUMBNAILS;
 
-		if(IsVista() ) listviewmode= XLVM_VISTA_LARGE_ICONS; 
+		if(IsVista() ) listviewmode= XLVM_VISTA_LARGE_ICONS;
 
 	}
-	else 
+	else
 	{
-		listviewmode=0; 
+		listviewmode=0;
 	}
-	
+
 
 }
 
 JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setTraceLevel2
   (JNIEnv *env, jclass cls, jint val)
 {
-	traceLevel= val; 
-	swprintf_s(tracebuffer, L"DLL>>: TraceLevel: %d\n", traceLevel); 
-	trace(); 
+	traceLevel= val;
+	swprintf_s(tracebuffer, L"DLL>>: TraceLevel: %d\n", traceLevel);
+	trace();
 
 }
 
@@ -416,32 +416,32 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setTraceLevel2
 JNIEXPORT jint JNICALL Java_net_tomahawk_XFileDialog_getMode2
   (JNIEnv *env, jobject obj)
 {
-	if(bOpenFileDialog ==TRUE ) return 0; 
-        else return 1; 	
+	if(bOpenFileDialog ==TRUE ) return 0;
+        else return 1;
 }
 
 JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getFile2
   (JNIEnv *env, jobject obj)
 {
-	CString pathName; 
-	bool bCanceled=true; 
-	
+	CString pathName;
+	bool bCanceled=true;
 
-	// the default cfiledialog 
-	if(listviewmode==0) 
+
+	// the default cfiledialog
+	if(listviewmode==0)
 	{
 	CFileDialog dlg2(bOpenFileDialog/*Open=TRUE Save=False*/,NULL/*Filename Extension*/,NULL/*Initial Filename*/, OFN_EXPLORER|OFN_HIDEREADONLY|OFN_ENABLESIZING|OFN_FILEMUSTEXIST/*Flags*/,filters/*Filetype Filter*/,pWnd/*parent Window*/);
-	swprintf_s(tracebuffer, L"DLL>>:: CFileDialog was chosen\n"); 
-	trace(); 
+	swprintf_s(tracebuffer, L"DLL>>:: CFileDialog was chosen\n");
+	trace();
 
 	(dlg2).m_ofn.lpstrTitle = title;
-	(dlg2).m_ofn.lpstrInitialDir= currentDir; 
+	(dlg2).m_ofn.lpstrInitialDir= currentDir;
 	if ( (dlg2).DoModal() == IDOK)
 	{
 //         fileName= (dlg2).GetFileName();
 
-	pathName=dlg2.GetPathName();  
-	bCanceled = false; 
+	pathName=dlg2.GetPathName();
+	bCanceled = false;
 	}
 
 
@@ -449,48 +449,48 @@ JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getFile2
 
 	if(listviewmode!=0 )
 	{
-	
-	if(IsXP() || IsVista() ) 
-	{	
+
+	if(IsXP() || IsVista() )
+	{
 	XPThumbnailDialog dlg1(bOpenFileDialog/*Open=TRUE Save=False*/,NULL/*Filename Extension*/,NULL/*Initial Filename*/, OFN_EXPLORER|OFN_HIDEREADONLY|OFN_ENABLESIZING|OFN_FILEMUSTEXIST/*Flags*/,filters/*Filetype Filter*/,pWnd/*parent Window*/);
-	swprintf_s(tracebuffer, L"DLL>>: XPThumbnailDialog was chosen\n"); 
-	trace(); 
+	swprintf_s(tracebuffer, L"DLL>>: XPThumbnailDialog was chosen\n");
+	trace();
 
 	(dlg1).m_ofn.lpstrTitle = title;
-	(dlg1).m_ofn.lpstrInitialDir= currentDir; 
+	(dlg1).m_ofn.lpstrInitialDir= currentDir;
 	if ( (dlg1).DoModal() == IDOK)
 	{
 //         fileName= (dlg1).GetFileName();
-	   pathName=dlg1.GetPathName();  
-	   bCanceled = false; 
+	   pathName=dlg1.GetPathName();
+	   bCanceled = false;
 	}
 
 
 
 	}
 
-	if(IsVista() && false) 
+	if(IsVista() && false)
 	{
-	
-	// preparation 	
-	// Vista requires such a line, otherwise, Jni can 
-	// not launch IFileDialog 	
 
-	swprintf_s(tracebuffer, L"DLL>>:: IFileDialog in Vista was chosen\n"); 
-	trace(); 
+	// preparation
+	// Vista requires such a line, otherwise, Jni can
+	// not launch IFileDialog
+
+	swprintf_s(tracebuffer, L"DLL>>:: IFileDialog in Vista was chosen\n");
+	trace();
 
 	CFileDialog dlg2(bOpenFileDialog/*Open=TRUE Save=False*/,NULL/*Filename Extension*/,NULL/*Initial Filename*/, OFN_EXPLORER|OFN_HIDEREADONLY|OFN_ENABLESIZING|OFN_FILEMUSTEXIST/*Flags*/,filters/*Filetype Filter*/,pWnd/*parent Window*/);
 	IFileDialog *pfd;
-    
+
 	    // CoCreate the dialog object.
-	    HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, 
-                                  NULL, 
-                                  CLSCTX_INPROC_SERVER, 
+	    HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog,
+                                  NULL,
+                                  CLSCTX_INPROC_SERVER,
                                   IID_PPV_ARGS(&pfd));
-    
+
 	    if (SUCCEEDED(hr))
 	    {
-		// set Title for pfd	    
+		// set Title for pfd
 
 		     hr = pfd->SetTitle (title);
 
@@ -506,34 +506,34 @@ JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getFile2
 
 	    	// Show the dialog
 	        hr = pfd->Show(hWnd);
-        
+
 
         	if (SUCCEEDED(hr))
 	        {
         	    // Obtain the result of the user's interaction with the dialog.
 	            IShellItem *pItem;
         	    hr = pfd->GetResult(&pItem);
-            
+
 	            if (SUCCEEDED(hr))
         	    {
                 	// Do something with the result.
-	
+
 			LPOLESTR pwsz = NULL;
- 
+
 		       hr = pItem->GetDisplayName ( SIGDN_FILESYSPATH, &pwsz );
- 
+
 		      if ( SUCCEEDED(hr) )
 		        {
-			// convert LPOLESTR => CString 
-			USES_CONVERSION;   
-			CString itemname(OLE2T(pwsz)); 
+			// convert LPOLESTR => CString
+			USES_CONVERSION;
+			CString itemname(OLE2T(pwsz));
 
-			pathName= itemname; 
-			bCanceled = false; 
+			pathName= itemname;
+			bCanceled = false;
 
 		        CoTaskMemFree ( pwsz );
 		        }
-	    
+
 		    pItem->Release();
         	    }
 	        }
@@ -545,39 +545,39 @@ JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getFile2
 
 
 	}
-	
+
 
 	} // end with thumbnail dialog
 
-	// calculate the filename and parent path from absolute path name 
- 	if(!bCanceled) 
+	// calculate the filename and parent path from absolute path name
+ 	if(!bCanceled)
 	{
  	int charPosition=pathName.ReverseFind( _T('\\') );
         CString filePath=pathName.Left((charPosition+1));
-	currentDir = filePath; 
+	currentDir = filePath;
 
-	swprintf_s(tracebuffer, L"DLL>>: charPosition of Seperator: %d \n", charPosition); 
-	trace(); 
+	swprintf_s(tracebuffer, L"DLL>>: charPosition of Seperator: %d \n", charPosition);
+	trace();
 
-	CString fileName = pathName.Mid(charPosition+1); 
+	CString fileName = pathName.Mid(charPosition+1);
 
-	swprintf_s(tracebuffer, L"DLL>>:: pathName %s\n", pathName); 
-	trace(); 
+	swprintf_s(tracebuffer, L"DLL>>:: pathName %s\n", pathName);
+	trace();
 
-	swprintf_s(tracebuffer, L"DLL>>:: fileName %s\n", fileName); 
-	trace(); 
+	swprintf_s(tracebuffer, L"DLL>>:: fileName %s\n", fileName);
+	trace();
 
 	// reset listviewmode to default case
-	listviewmode=0; 
+	listviewmode=0;
 
-	swprintf_s(tracebuffer, L"DLL>>: currentDir: %s\n", currentDir); 
-	trace(); 
+	swprintf_s(tracebuffer, L"DLL>>: currentDir: %s\n", currentDir);
+	trace();
 
-	jbyteArray bArray = CString2ByteArray(env, fileName); 
-	return bArray; 
-	} 
-	else 
-	return 0; 
+	jbyteArray bArray = CString2ByteArray(env, fileName);
+	return bArray;
+	}
+	else
+	return 0;
 
 }
 
@@ -586,75 +586,75 @@ JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getFolder2
   (JNIEnv *env, jobject obj)
 {
 
-	CString folderName; 
+	CString folderName;
 
-	INT_PTR nCounter=0; 
-	bool UsingDefaultFolder=false; 
+	INT_PTR nCounter=0;
+	bool UsingDefaultFolder=false;
 
 	// testing the X64 XPFolderDialog for Windows XP 64bit
 
-	if( IsXP() ) 
+	if( IsXP() )
 	{
 
-	XPFolderDialog dlg(bOpenFileDialog, OFN_EXPLORER|OFN_HIDEREADONLY|OFN_ENABLESIZING|OFN_FILEMUSTEXIST, ONLYFOLDERS, NULL, NULL, pWnd/*Flags*/); 
+	XPFolderDialog dlg(bOpenFileDialog, OFN_EXPLORER|OFN_HIDEREADONLY|OFN_ENABLESIZING|OFN_FILEMUSTEXIST, ONLYFOLDERS, NULL, NULL, pWnd/*Flags*/);
 
 	// folder selection should not have an initial filename
-	dlg.m_ofn.lpstrInitialDir= currentDir; 
+	dlg.m_ofn.lpstrInitialDir= currentDir;
 	dlg.m_ofn.lpstrTitle = title;
 
 	// folderdialog in XP relies on a Windows Hook
-	// feedback must be processed 
-	    INT_PTR feedback = dlg.DoModal(); 
+	// feedback must be processed
+	    INT_PTR feedback = dlg.DoModal();
 	    if ( feedback == IDOK)
 		{
-		INT_PTR num = dlg.GetItemNumber(); 
+		INT_PTR num = dlg.GetItemNumber();
 
-		if(num> 0) 
+		if(num> 0)
 		{
 	       	folderName = dlg.GetItemName();
-		nCounter= num; 
+		nCounter= num;
 		}
-		else 
+		else
 		{
-		// return the currentDir when you select nothing but click OK 	
-		// use default selection 
-		UsingDefaultFolder=true; 
-		folderName=currentDir; 
-		nCounter=1; 
+		// return the currentDir when you select nothing but click OK
+		// use default selection
+		UsingDefaultFolder=true;
+		folderName=currentDir;
+		nCounter=1;
 		}
 
 		}
 
 	}
 
-	if(IsVista() ) 
+	if(IsVista() )
 	{
-	
-	// preparation 	
-	// Vista requires such a line, otherwise, Jni can 
-	// not launch IFileDialog 	
 
-	swprintf_s(tracebuffer, L"DLL>>:: IFileDialog was chosen\n"); 
-	trace(); 
+	// preparation
+	// Vista requires such a line, otherwise, Jni can
+	// not launch IFileDialog
+
+	swprintf_s(tracebuffer, L"DLL>>:: IFileDialog was chosen\n");
+	trace();
 
 	CFileDialog dlg2(bOpenFileDialog/*Open=TRUE Save=False*/,NULL/*Filename Extension*/,NULL/*Initial Filename*/, OFN_EXPLORER|OFN_HIDEREADONLY|OFN_ENABLESIZING|OFN_FILEMUSTEXIST/*Flags*/,filters/*Filetype Filter*/,pWnd/*parent Window*/);
-		
-	// we have to set the initial Directory 
-	// otherwise, its behavior will be different from XP. 
+
+	// we have to set the initial Directory
+	// otherwise, its behavior will be different from XP.
 	//
-	
+
 		IFileDialog *pfd;
-		DWORD dwOptions; 
-    
+		DWORD dwOptions;
+
 	    // CoCreate the dialog object.
-	    HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, 
-                                  NULL, 
-                                  CLSCTX_INPROC_SERVER, 
+	    HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog,
+                                  NULL,
+                                  CLSCTX_INPROC_SERVER,
                                   IID_PPV_ARGS(&pfd));
-    
+
 	    if (SUCCEEDED(hr))
 	    {
-		// set Title for pfd	    
+		// set Title for pfd
 
 		     hr = pfd->SetTitle (title);
 
@@ -665,93 +665,93 @@ JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getFolder2
 	            hr = pfd->SetOptions(dwOptions | FOS_PICKFOLDERS | FOS_FILEMUSTEXIST);
         	}
 
-		 // remember last-visit location and set the folder location 
-		 if(currentDirItem!=NULL) 
+		 // remember last-visit location and set the folder location
+		 if(currentDirItem!=NULL)
 		 {
 
- 		 hr = pfd->SetFolder(currentDirItem); 
+ 		 hr = pfd->SetFolder(currentDirItem);
 
 		 }
 
         	// Show the dialog
 	        hr = pfd->Show(hWnd);
-        
+
         	if (SUCCEEDED(hr))
 	        {
         	    // Obtain the result of the user's interaction with the dialog.
 	            IShellItem *pItem;
         	    hr = pfd->GetResult(&pItem);
-            
+
 	            if (SUCCEEDED(hr))
         	    {
- 			LPOLESTR pwsz = NULL;                
+ 			LPOLESTR pwsz = NULL;
 
 
 		 // To deal with the case when you select nothing but click OK
-		 // use CurrentDir instead of currentDirItem 
-		 // the later will crash the JVM 
+		 // use CurrentDir instead of currentDirItem
+		 // the later will crash the JVM
 		 //
 
-		if(!currentDir.IsEmpty()) 
+		if(!currentDir.IsEmpty())
 		{
 
-		hr=pItem->GetDisplayName(SIGDN_FILESYSPATH, &pwsz ); 
-		CString tmp1(pwsz); 
+		hr=pItem->GetDisplayName(SIGDN_FILESYSPATH, &pwsz );
+		CString tmp1(pwsz);
 
-		if(currentDir.Compare(tmp1)==0) 
+		if(currentDir.Compare(tmp1)==0)
 			{
-			UsingDefaultFolder=true; 
+			UsingDefaultFolder=true;
 			}
 		}
-		else 
+		else
 		{
-		// init for the first time with the pItem	
-			printf("DLL>>: Init Default Folder first time\n");  
-			hr=pItem->GetDisplayName(SIGDN_FILESYSPATH, &pwsz ); 
-			CString tmp(pwsz); 
+		// init for the first time with the pItem
+			printf("DLL>>: Init Default Folder first time\n");
+			hr=pItem->GetDisplayName(SIGDN_FILESYSPATH, &pwsz );
+			CString tmp(pwsz);
 			currentDir = tmp.Left(tmp.GetLength());
-			UsingDefaultFolder=true; 
-			printf("DLL>>: End of Init Default Folder\n");  
+			UsingDefaultFolder=true;
+			printf("DLL>>: End of Init Default Folder\n");
 		}
 
 		if(!UsingDefaultFolder)
 		{
-		// An unusual situation: 
+		// An unusual situation:
 		//
-		// you select nothing but click OK, 
-		// In this case, the default current folder will be used, 
+		// you select nothing but click OK,
+		// In this case, the default current folder will be used,
 		// the currentDirItem will not be set in this case
 
-    		hr= pItem->GetParent(&currentDirItem); 
-		        if(SUCCEEDED(hr)) 
+    		hr= pItem->GetParent(&currentDirItem);
+		        if(SUCCEEDED(hr))
 			{
 			hr= currentDirItem->GetDisplayName(SIGDN_FILESYSPATH, &pwsz );
-				if(SUCCEEDED(hr) ) 
+				if(SUCCEEDED(hr) )
 				{
-				CString tmp(pwsz); 
-				swprintf_s(tracebuffer, L"DLL>>: parent of the current folder: %s\n", tmp); 	
-				trace(); 
+				CString tmp(pwsz);
+				swprintf_s(tracebuffer, L"DLL>>: parent of the current folder: %s\n", tmp);
+				trace();
 				}
 			}
 		}
-		
+
 		    // Do something with the result.
-	
+
 		       hr = pItem->GetDisplayName ( SIGDN_FILESYSPATH, &pwsz );
- 
+
 		      if ( SUCCEEDED(hr) )
 		        {
 
-			CString itemname(pwsz); 
+			CString itemname(pwsz);
 
-			folderName= itemname; 
-			nCounter=1; 
-			swprintf_s(tracebuffer, L"DLL>>: a folder was picked: %s\n", itemname); 	
-			trace(); 
+			folderName= itemname;
+			nCounter=1;
+			swprintf_s(tracebuffer, L"DLL>>: a folder was picked: %s\n", itemname);
+			trace();
 
 		        CoTaskMemFree ( pwsz );
 		        }
-	    
+
 		    pItem->Release();
         	    }
 	        }
@@ -760,29 +760,29 @@ JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getFolder2
 
 
 	}
-	
 
-	// select something 
-	if(nCounter > 0) 
+
+	// select something
+	if(nCounter > 0)
 	{
-		swprintf_s(tracebuffer, L"DLL>>: folder picked in XPFolderDialog : %s\n", folderName ); 	
-		trace(); 
+		swprintf_s(tracebuffer, L"DLL>>: folder picked in XPFolderDialog : %s\n", folderName );
+		trace();
 
 		if(!UsingDefaultFolder)
 		{
 		currentDir = folderName.Left(folderName.ReverseFind(_T('\\')) +1 );
-		swprintf_s(tracebuffer, L"DLL>>: currentDir: %s\n", currentDir ); 	
-		trace(); 
+		swprintf_s(tracebuffer, L"DLL>>: currentDir: %s\n", currentDir );
+		trace();
 		}
-		
 
-		jbyteArray bArray = CString2ByteArray(env, folderName); 
-		return bArray; 
+
+		jbyteArray bArray = CString2ByteArray(env, folderName);
+		return bArray;
 	}
-	else 
+	else
 	{
 
-		return 0; 
+		return 0;
 	}
 
 }
@@ -792,11 +792,11 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setFilters2
   (JNIEnv *env, jobject obj, jstring filterstr)
 {
 	const jchar *str = (*env).GetStringChars(filterstr, 0);
-	
 
-	CString tmp((BSTR)str); 
 
-	filters= tmp; 
+	CString tmp((BSTR)str);
+
+	filters= tmp;
 }
 
 JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setTitle2
@@ -804,15 +804,15 @@ JNIEXPORT void JNICALL Java_net_tomahawk_XFileDialog_setTitle2
 {
 	const jchar *str = (*env).GetStringChars(dlgtitle, 0);
 
-	CString tmp((BSTR)str); 
-	title= tmp; 
+	CString tmp((BSTR)str);
+	title= tmp;
 }
 
 
 JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getTitle2
   (JNIEnv *env, jobject obj)
 {
-	return CString2ByteArray(env, title); 
+	return CString2ByteArray(env, title);
 }
 
 // 	Readme
@@ -825,22 +825,22 @@ JNIEXPORT jbyteArray JNICALL Java_net_tomahawk_XFileDialog_getTitle2
 JNIEXPORT jobjectArray JNICALL Java_net_tomahawk_XFileDialog_getFiles2
 (JNIEnv *env, jobject obj)
 {
-	// MAX_SELECTION = 500  
-	// multi-selection at most 500 files one time 
+	// MAX_SELECTION = 500
+	// multi-selection at most 500 files one time
 	//
-	// Change it if you wish 
-	// 
+	// Change it if you wish
+	//
 
-	CString absoluteFileNames[MAX_SELECTION]; 
-	CString pathName; 
+	CString absoluteFileNames[MAX_SELECTION];
+	CString pathName;
 	LPTSTR lpstrFile= new TCHAR[MAX_PATH*MAX_SELECTION];
 	*lpstrFile=0; // set the string to be empty at first
-	int nCounter=0; 
+	int nCounter=0;
 
-	// for thumbnail dialog 
-	if(listviewmode!=0) 
+	// for thumbnail dialog
+	if(listviewmode!=0)
 	{
-	
+
 	if(IsXP() || IsVista() )
 	{
 
@@ -848,7 +848,7 @@ JNIEXPORT jobjectArray JNICALL Java_net_tomahawk_XFileDialog_getFiles2
 	dlg1.m_ofn.lpstrFile = lpstrFile;
 	dlg1.m_ofn.nMaxFile = MAX_PATH*MAX_SELECTION;
 	dlg1.m_ofn.lpstrTitle = title;
-	dlg1.m_ofn.lpstrInitialDir= currentDir; 
+	dlg1.m_ofn.lpstrInitialDir= currentDir;
 
 	if (dlg1.DoModal() == IDOK)
 	{
@@ -856,18 +856,18 @@ JNIEXPORT jobjectArray JNICALL Java_net_tomahawk_XFileDialog_getFiles2
 
 	while(pos)
 	{
-		
-		if(nCounter>=MAX_SELECTION) break; 
+
+		if(nCounter>=MAX_SELECTION) break;
 
 		absoluteFileNames[nCounter] = dlg1.GetNextPathName(pos);
-		swprintf_s(tracebuffer, L"DLL>>: filename: %s\n", absoluteFileNames[nCounter]); 
-		trace(); 
+		swprintf_s(tracebuffer, L"DLL>>: filename: %s\n", absoluteFileNames[nCounter]);
+		trace();
 
-		nCounter++; 	
+		nCounter++;
 
 	}
 	// refresh currentDir
-	currentDir = dlg1.GetPathName();  
+	currentDir = dlg1.GetPathName();
 	}
 
 	}
@@ -875,11 +875,11 @@ JNIEXPORT jobjectArray JNICALL Java_net_tomahawk_XFileDialog_getFiles2
 	}
 	else  // for normal files
 	{
-	CFileDialog dlg2(bOpenFileDialog/*Open=TRUE Save=False*/,NULL/*Filename Extension*/,NULL/*Initial Filename*/, OFN_EXPLORER|OFN_HIDEREADONLY|OFN_ENABLESIZING|OFN_FILEMUSTEXIST|OFN_ALLOWMULTISELECT/*Flags*/,filters/*Filetype Filter*/,pWnd/*parent Window*/);		
+	CFileDialog dlg2(bOpenFileDialog/*Open=TRUE Save=False*/,NULL/*Filename Extension*/,NULL/*Initial Filename*/, OFN_EXPLORER|OFN_HIDEREADONLY|OFN_ENABLESIZING|OFN_FILEMUSTEXIST|OFN_ALLOWMULTISELECT/*Flags*/,filters/*Filetype Filter*/,pWnd/*parent Window*/);
 	dlg2.m_ofn.lpstrFile = lpstrFile;
 	dlg2.m_ofn.nMaxFile = MAX_PATH*MAX_SELECTION;
 	dlg2.m_ofn.lpstrTitle = title;
-	dlg2.m_ofn.lpstrInitialDir= currentDir; 
+	dlg2.m_ofn.lpstrInitialDir= currentDir;
 
 	if (dlg2.DoModal() == IDOK)
 	{
@@ -887,93 +887,93 @@ JNIEXPORT jobjectArray JNICALL Java_net_tomahawk_XFileDialog_getFiles2
 
 	while(pos)
 	{
-	
-		if(nCounter>=MAX_SELECTION) break; 
+
+		if(nCounter>=MAX_SELECTION) break;
 
 		absoluteFileNames[nCounter] = dlg2.GetNextPathName(pos);
-		swprintf_s(tracebuffer, L"DLL>>: Abstract Filename: %s\n", absoluteFileNames[nCounter]); 
-		trace(); 
+		swprintf_s(tracebuffer, L"DLL>>: Abstract Filename: %s\n", absoluteFileNames[nCounter]);
+		trace();
 
-		nCounter++; 	
+		nCounter++;
 
 
 	}
 	// refresh currentDir
-	currentDir = dlg2.GetPathName();  
+	currentDir = dlg2.GetPathName();
 	}
 
 
 	}
 
-	if(nCounter==1) 
+	if(nCounter==1)
 	{
-	// selecting only one file with multi-selection may cause 
-	// incorrect path, it must be fixed here. 	
+	// selecting only one file with multi-selection may cause
+	// incorrect path, it must be fixed here.
 
-	// reverse find and trim last several chars 
+	// reverse find and trim last several chars
         int charPosition=currentDir.ReverseFind('\\');
         currentDir=currentDir.Left((charPosition+1));
-	swprintf_s(tracebuffer, L"charPosition of seperator : %d \n", charPosition); 
-	trace(); 
+	swprintf_s(tracebuffer, L"charPosition of seperator : %d \n", charPosition);
+	trace();
 
 
 	}
 	if(nCounter> 1) currentDir= currentDir + _T("\\"); // add a last seperator
 
 	// reset listviewmode to default case
-	listviewmode=0; 
+	listviewmode=0;
 
-	swprintf_s(tracebuffer, L"DLL>> currentDir: %s\n", currentDir); 
-	trace(); 
+	swprintf_s(tracebuffer, L"DLL>> currentDir: %s\n", currentDir);
+	trace();
 
-	delete[] lpstrFile; 
+	delete[] lpstrFile;
 
-	if(nCounter > 0) 
+	if(nCounter > 0)
 	{
 	int i;
 
-	jbyteArray temprow = (*env).NewByteArray(1); 
-	jclass objCls = (*env).GetObjectClass(temprow); 
+	jbyteArray temprow = (*env).NewByteArray(1);
+	jclass objCls = (*env).GetObjectClass(temprow);
 
 //	jclass objCls = (*env).FindClass("Ljava/lang/String;");
 	jobjectArray objarray = (*env).NewObjectArray(nCounter,objCls,NULL);
 
-	
+
 	if( IsVista() )
 	{
         swprintf_s(tracebuffer, L"DLL>>:: return multi-selection from Vista\n");
-	trace(); 
+	trace();
 
 	for(i=0;i<nCounter;i++)
 	{
-	jbyteArray row = CString2ByteArray(env, absoluteFileNames[i]); 
+	jbyteArray row = CString2ByteArray(env, absoluteFileNames[i]);
 	(*env).SetObjectArrayElement(objarray,i, row);
 	(*env).DeleteLocalRef(row);
 	}
 
 	}
-	else 
+	else
 	{
 	swprintf_s(tracebuffer, L"DLL>>:: the array order need to be changed for multi-selection from XP.\n");
-	trace(); 
-	
+	trace();
+
 
 	for(i=0;i<nCounter-1;i++)
 	{
-	jbyteArray row = CString2ByteArray(env, absoluteFileNames[i+1]); 
+	jbyteArray row = CString2ByteArray(env, absoluteFileNames[i+1]);
 	(*env).SetObjectArrayElement(objarray,i, row);
 	(*env).DeleteLocalRef(row);
 	}
-	jbyteArray row = CString2ByteArray(env, absoluteFileNames[0]); 
+	jbyteArray row = CString2ByteArray(env, absoluteFileNames[0]);
 	(*env).SetObjectArrayElement(objarray,nCounter-1, row);
 	(*env).DeleteLocalRef(row);
 	}
 
-	return objarray; 
+	return objarray;
 	}
-	else 
+	else
 	{
-	return 0; 	
+	return 0;
 	}
 
 }
@@ -981,66 +981,66 @@ JNIEXPORT jobjectArray JNICALL Java_net_tomahawk_XFileDialog_getFiles2
 JNIEXPORT jobjectArray JNICALL Java_net_tomahawk_XFileDialog_getFolders2
 (JNIEnv *env, jobject obj)
 {
-	INT_PTR nCounter=0; 
-	bool UsingDefaultFolder=false; 
+	INT_PTR nCounter=0;
+	bool UsingDefaultFolder=false;
 	// at most MAX_SELECTION folders
-	CString folderNames[MAX_SELECTION]; 
+	CString folderNames[MAX_SELECTION];
 
-	if(IsXP() ) 
+	if(IsXP() )
 	{
 
-	XPFolderDialog dlg(bOpenFileDialog, OFN_EXPLORER|OFN_ENABLESIZING|OFN_FILEMUSTEXIST|OFN_ALLOWMULTISELECT, ONLYFOLDERS, NULL, NULL, pWnd/*Flags*/); 
+	XPFolderDialog dlg(bOpenFileDialog, OFN_EXPLORER|OFN_ENABLESIZING|OFN_FILEMUSTEXIST|OFN_ALLOWMULTISELECT, ONLYFOLDERS, NULL, NULL, pWnd/*Flags*/);
 	// multi selection should not have an initial filename
-	dlg.m_ofn.lpstrInitialDir= currentDir; 
+	dlg.m_ofn.lpstrInitialDir= currentDir;
 	dlg.m_ofn.lpstrTitle = title;
 
 
     if ( dlg.DoModal() == IDOK )
 	{
 
-	INT_PTR num = dlg.GetItemNumber(); 
-		if(num> 0) 
+	INT_PTR num = dlg.GetItemNumber();
+		if(num> 0)
 		{
-		nCounter= num; 
-		for(int i=0;i<num;i++) 	
+		nCounter= num;
+		for(int i=0;i<num;i++)
 		{
 		       	folderNames[i] = dlg.GetItemName(i);
 		}
 		}
-		else 
+		else
 		{
-		// return the currentDir when you select nothing but click OK 	
-		folderNames[0]=currentDir; 
-		nCounter=1; 
+		// return the currentDir when you select nothing but click OK
+		folderNames[0]=currentDir;
+		nCounter=1;
 		}
 
-		
-	}
 
 	}
 
-	if(IsVista() ) 
+	}
+
+	if(IsVista() )
 	{
-	
-	// preparation 	
-	// Vista requires such a line, otherwise, Jni can 
-	// not launch IFileDialog 	
 
-	swprintf_s(tracebuffer, L"DLL>>:: IFileDialog was chosen\n"); 
+	// preparation
+	// Vista requires such a line, otherwise, Jni can
+	// not launch IFileDialog
+
+	swprintf_s(tracebuffer, L"DLL>>:: IFileDialog was chosen\n");
 
 	CFileDialog dlg2(bOpenFileDialog/*Open=TRUE Save=False*/,NULL/*Filename Extension*/,NULL/*Initial Filename*/, OFN_EXPLORER|OFN_HIDEREADONLY|OFN_ENABLESIZING|OFN_FILEMUSTEXIST/*Flags*/,filters/*Filetype Filter*/,pWnd/*parent Window*/);
 		IFileOpenDialog *pfd;
-		DWORD dwOptions; 
-    
+		DWORD dwOptions;
+
 	    // CoCreate the dialog object.
-	    HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, 
-                                  NULL, 
-                                  CLSCTX_INPROC_SERVER, 
+	    HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog,
+                                  NULL,
+                                  CLSCTX_INPROC_SERVER,
                                   IID_PPV_ARGS(&pfd));
-    
+
 	    if (SUCCEEDED(hr))
 	    {
-		// set Title for pfd	    
+		// set Title for pfd
 
 		     hr = pfd->SetTitle (title);
 
@@ -1051,17 +1051,17 @@ JNIEXPORT jobjectArray JNICALL Java_net_tomahawk_XFileDialog_getFolders2
 	            hr = pfd->SetOptions(dwOptions | FOS_PICKFOLDERS | FOS_ALLOWMULTISELECT);
         	}
 
-		 // set the current folder myself 
-		 // in the JFileChooser's way 
-		 if(!currentDir.IsEmpty()) 
+		 // set the current folder myself
+		 // in the JFileChooser's way
+		 if(!currentDir.IsEmpty())
 		 {
- 		 hr = pfd->SetFolder(currentDirItem); 
+ 		 hr = pfd->SetFolder(currentDirItem);
 		 }
 
 
         	// Show the dialog
 	        hr = pfd->Show(hWnd);
-        
+
         	if (SUCCEEDED(hr))
 	        {
 
@@ -1069,10 +1069,10 @@ JNIEXPORT jobjectArray JNICALL Java_net_tomahawk_XFileDialog_getFolders2
 		// Obtain the result of the user's interaction with the dialog.
 			IShellItemArray *pItemArray;
 	                hr = pfd->GetResults(&pItemArray);
-			
+
 	            if (SUCCEEDED(hr))
         	    {
- 
+
       			DWORD cSelItems;
       			// Get the number of selected files.
 		      hr = pItemArray->GetCount ( &cSelItems );
@@ -1086,55 +1086,55 @@ JNIEXPORT jobjectArray JNICALL Java_net_tomahawk_XFileDialog_getFolders2
           		if ( SUCCEEDED(hr) )
 		            {
 		            LPOLESTR pwsz = NULL;
- 
+
 			    // keep the parent when j==0 (the first file)
-	
-		    
+
+
 			   if(j==0)
 			   {
 
 		 	// To deal with the case when you select nothing but click OK
-			if(!currentDir.IsEmpty()) 
+			if(!currentDir.IsEmpty())
 			{
 
-			hr=pItem->GetDisplayName(SIGDN_FILESYSPATH, &pwsz ); 
-			CString tmp1(pwsz); 
+			hr=pItem->GetDisplayName(SIGDN_FILESYSPATH, &pwsz );
+			CString tmp1(pwsz);
 
-			if(currentDir.Compare(tmp1)==0) 
+			if(currentDir.Compare(tmp1)==0)
 				{
-				UsingDefaultFolder=true; 
+				UsingDefaultFolder=true;
 				}
 			}
-			else 
+			else
 			{
-			// init for the first time with the pItem	
-			printf("DLL>>: Init Default Folder first time\n");  
-			hr=pItem->GetDisplayName(SIGDN_FILESYSPATH, &pwsz ); 
-			CString tmp(pwsz); 
+			// init for the first time with the pItem
+			printf("DLL>>: Init Default Folder first time\n");
+			hr=pItem->GetDisplayName(SIGDN_FILESYSPATH, &pwsz );
+			CString tmp(pwsz);
 			currentDir = tmp.Left(tmp.GetLength());
-			UsingDefaultFolder=true; 
-			printf("DLL>>: End of Init Default Folder\n");  
+			UsingDefaultFolder=true;
+			printf("DLL>>: End of Init Default Folder\n");
 			}
 
-	
-			if(!UsingDefaultFolder) 
+
+			if(!UsingDefaultFolder)
 				{
-				    hr= pItem->GetParent(&currentDirItem); 
-			        if(SUCCEEDED(hr)) 
+				    hr= pItem->GetParent(&currentDirItem);
+			        if(SUCCEEDED(hr))
 				{
 				hr= currentDirItem->GetDisplayName(SIGDN_FILESYSPATH, &pwsz );
-					if(SUCCEEDED(hr) ) 
+					if(SUCCEEDED(hr) )
 					{
-					CString tmp(pwsz); 
-					swprintf_s(tracebuffer, L"DLL>>: parnent of current folders: %s\n", tmp); 	
-					trace(); 
+					CString tmp(pwsz);
+					swprintf_s(tracebuffer, L"DLL>>: parnent of current folders: %s\n", tmp);
+					trace();
 					}
 
 
 
 				}
 				  }
-				} // end of j=0 
+				} // end of j=0
 
 		            // Get its file system path.
 			    //
@@ -1142,15 +1142,15 @@ JNIEXPORT jobjectArray JNICALL Java_net_tomahawk_XFileDialog_getFolders2
 			    // convert it to Cstring
         		    if ( SUCCEEDED(hr) )
 		              {
-				USES_CONVERSION;   
-				CString itemname(OLE2T(pwsz)); 
-				folderNames[j]= itemname; 
-				nCounter++; 	
+				USES_CONVERSION;
+				CString itemname(OLE2T(pwsz));
+				folderNames[j]= itemname;
+				nCounter++;
 	        	      CoTaskMemFree ( pwsz );
 		              }
             		 }
-          		} // end for loop 
-	       	} // the array was get successfully 
+          		} // end for loop
+	       	} // the array was get successfully
 
 	    		    pItemArray->Release();
         	    }
@@ -1161,32 +1161,32 @@ JNIEXPORT jobjectArray JNICALL Java_net_tomahawk_XFileDialog_getFolders2
 
 
 	}
-		if(nCounter >0) 
+		if(nCounter >0)
 		{
-		
-		if(!UsingDefaultFolder) 
-		{	
+
+		if(!UsingDefaultFolder)
+		{
 		currentDir = folderNames[0].Left(folderNames[0].ReverseFind(_T('\\')) +1 );
-		swprintf_s(tracebuffer, L"DLL>>: currentDir : %s\n", currentDir); 	
+		swprintf_s(tracebuffer, L"DLL>>: currentDir : %s\n", currentDir);
 		}
 
 		// return an object array
-		jbyteArray temprow = (*env).NewByteArray(1); 
-		jclass objCls = (*env).GetObjectClass(temprow); 
+		jbyteArray temprow = (*env).NewByteArray(1);
+		jclass objCls = (*env).GetObjectClass(temprow);
 
 	//	jclass objCls = (*env).FindClass("Ljava/lang/String;");
 		jobjectArray objarray = (*env).NewObjectArray((jsize)nCounter,objCls,NULL);
 
 		for(int i=0;i<nCounter;i++)
 		{
-		jbyteArray row = CString2ByteArray(env, folderNames[i]); 
+		jbyteArray row = CString2ByteArray(env, folderNames[i]);
 		(*env).SetObjectArrayElement(objarray,i, row);
 		(*env).DeleteLocalRef(row);
 		}
 
-		return objarray; 
+		return objarray;
 		}
-		else 
+		else
 		return 0;  // 0 is NULL
 
 }

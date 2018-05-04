@@ -432,7 +432,7 @@ public class XFileDialog
 			if(System.getProperty("os.arch").indexOf("64") >= 0)
 			{
 				trace("JNI>>: Loading X64 (amd64) DLL");
-				System.loadLibrary("xfiledialog64");
+				System.loadLibrary("windows-file-chooser64");
 			}
 			else
 			{
