@@ -1,12 +1,8 @@
 package consulo.internal.windows;
 
-import java.applet.Applet;
-import java.awt.Component;
-import java.awt.FileDialog;
-import java.awt.Frame;
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
-
-import javax.swing.JFileChooser;
 
 // to add patch from Jose 
 // 1. the new extensionsfilter has been added. 
@@ -51,10 +47,9 @@ public class WindowsFileDialog
 	//
 	private static int traceLevel = 1;
 
+	private native void initWithWindowTitle(String windowtitle);
 
-	public native void initWithWindowTitle(String windowtitle);
-
-	public native void initWithJAWT(Component c, String javahome);
+	private native void initWithJAWT(Component c, String javahome);
 
 	private String nativefilters = "";
 
@@ -473,32 +468,7 @@ public class WindowsFileDialog
 			nativefilters = "";  // always reset native filter str in constructor
 
 			trace("JNI>>: Init dialog with JAWT ");
-
 		}
-
-	}
-
-	public WindowsFileDialog(Applet parent)
-	{
-
-		String windowtitle = null;
-		this.parent = parent;
-
-		initClass();
-
-		if(parent != null)
-		{
-			parent.setIgnoreRepaint(false);  // prevent error
-		}
-
-		// solution2: find the correct window handele with jawt/awt
-		if(nativeEnabled)
-		{
-			String javahome = System.getProperty("java.home");
-			initWithJAWT(parent, javahome);
-			trace("JNI>>: Init dialog with JAWT for Applet/Japplet");
-		}
-
 	}
 
 	public WindowsFileDialog(String windowtitle)
@@ -561,7 +531,6 @@ public class WindowsFileDialog
 
 	}
 
-
 	private void setJavaSelectionMode(Mode mode)
 	{
 		switch(mode)
@@ -599,7 +568,6 @@ public class WindowsFileDialog
 				failsafe.showSaveDialog(component);
 		}
 	}
-
 }
 
 
